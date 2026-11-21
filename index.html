@@ -102,6 +102,8 @@ video { width: 100%; border-radius: 14px; background: #000; display: block; bord
 .cert .name { font-family: var(--display); font-size: 26px; font-weight: 800; border-bottom: 2px solid #c8d4e2; padding: 10px 0 6px; margin: 14px 0 8px; min-height: 1.6em; }
 .cert .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; font-size: 14px; }
 .cert .meta div b { display: block; font-family: var(--display); font-size: 20px; font-variant-numeric: tabular-nums; }
+.void { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%) rotate(-18deg); border: 6px solid rgba(214,40,40,.55); color: rgba(214,40,40,.55); font-family: var(--display); font-weight: 900; font-size: 54px; letter-spacing: .08em; padding: 4px 22px; border-radius: 12px; pointer-events: none; white-space: nowrap; }
+.voidnote { margin-top: 14px; font-size: 12px; color: #b42318; font-weight: 700; border-top: 1px dashed #e5b4ae; padding-top: 8px; }
 .field { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
 .field input { background: #0e1c30; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 12px; font: inherit; }
 .locked { padding: 16px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); margin-top: 16px; }
@@ -176,7 +178,8 @@ footer .wrap { padding-top: 16px; padding-bottom: 24px; display: flex; gap: 12px
           <label for="posIn">Лауазымыңыз</label>
           <input id="posIn" type="text" maxlength="60" placeholder="Мысалы: жетекші инженер">
         </div>
-        <p class="muted" style="font-size:13px">Сертификатты сақтау үшін экранның суретін түсір.</p>
+        <div class="actions"><button class="btn sig" id="dlBtn" type="button">Сертификатты жүктеу (PNG)</button></div>
+        <p class="muted" style="font-size:13px" id="dlNote">Сертификат PNG-сурет ретінде жүктеледі.</p>
         <video src="outro.mp4" poster="outro.jpg" controls playsinline preload="metadata" style="margin-top:12px"></video>
       </div>
       <div class="cert" id="cert">
@@ -193,6 +196,8 @@ footer .wrap { padding-top: 16px; padding-bottom: 24px; display: flex; gap: 12px
           <div>Тақырыптар<b style="font-size:13px;line-height:1.35">наряд-рұқсат, ЖҚҚ, темірбетон тіректер, биіктік, кәбіл құдығы</b></div>
         </div>
         <div style="margin-top:18px;font-family:var(--display);font-weight:900;color:#0b4f8a">Қауіпсіздікті сақта! Сені үйде күтеді.</div>
+        <div class="voidnote">Бұл сертификат жарамсыз. Ресми құжат емес, тек оқу-танысу мақсатында берілген.</div>
+        <div class="void" aria-hidden="true">ЖАРАМСЫЗ</div>
       </div>
     </div>
   </section>
@@ -380,6 +385,7 @@ function renderCert() {
   $('certLock').style.display = ok ? 'none' : 'block';
   $('certLock').textContent = ok ? '' : `Сертификат әлі жабық: ${done}/5 сабақ өтілді, ${score}/20 дұрыс жауап. Қажет: 5 сабақ және кемінде 16 дұрыс жауап.`;
   $('cert').style.opacity = ok ? '1' : '.35';
+  $('dlBtn').disabled = !ok;
   $('nameIn').value = state.name || ''; $('posIn').value = state.pos || '';
   $('cName').textContent = state.name || 'Аты-жөні';
   $('cPos').textContent = state.pos || 'Лауазымы';
@@ -389,6 +395,71 @@ function renderCert() {
 }
 $('nameIn').addEventListener('input', e => { state.name = e.target.value; save(); $('cName').textContent = state.name || 'Аты-жөні'; });
 $('posIn').addEventListener('input', e => { state.pos = e.target.value; save(); $('cPos').textContent = state.pos || 'Лауазымы'; });
+
+const LOGO_IMG = new Image(); LOGO_IMG.src = 'logo.png';
+function wrapText(ctx, text, x, y, maxW, lh) {
+  const words = text.split(' '); let line = ''; let yy = y;
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxW && line) { ctx.fillText(line, x, yy); line = w; yy += lh; } else line = test;
+  }
+  if (line) ctx.fillText(line, x, yy);
+  return yy;
+}
+async function drawCert() {
+  try { await document.fonts.ready; } catch (e) {}
+  if (!LOGO_IMG.complete) await new Promise(r => { LOGO_IMG.onload = r; LOGO_IMG.onerror = r; });
+  const W = 1600, H = 1130, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
+  x.fillStyle = '#fdfcf7'; x.fillRect(30, 30, W - 60, H - 60);
+  x.strokeStyle = '#1a8ce0'; x.lineWidth = 6; x.strokeRect(30, 30, W - 60, H - 60);
+  x.strokeStyle = '#c8d4e2'; x.lineWidth = 2; x.strokeRect(50, 50, W - 100, H - 100);
+  // stripe
+  for (let i = 0; i < 40; i++) { x.fillStyle = i % 2 ? '#1a1a1a' : '#f2c230'; x.beginPath(); x.moveTo(50 + i * 40, 50); x.lineTo(90 + i * 40, 50); x.lineTo(70 + i * 40, 70); x.lineTo(30 + i * 40, 70); x.closePath(); x.fill(); }
+  const lh = 120, lw = LOGO_IMG.naturalWidth ? LOGO_IMG.naturalWidth * lh / LOGO_IMG.naturalHeight : 0;
+  if (lw) x.drawImage(LOGO_IMG, 110, 110, lw, lh);
+  x.fillStyle = '#0b4f8a'; x.font = '900 76px Montserrat, Arial Black, sans-serif'; x.textBaseline = 'alphabetic';
+  x.fillText('СЕРТИФИКАТ', 110, 330);
+  x.fillStyle = '#13233a'; x.font = '500 30px "Noto Sans", Arial, sans-serif';
+  x.fillText('Өндірістік қауіпсіздік бойынша сандық тренажёрдан табысты өтті', 110, 385);
+  x.font = '800 58px Montserrat, Arial, sans-serif'; x.fillStyle = '#13233a';
+  x.fillText(state.name || 'Аты-жөні', 110, 500);
+  x.fillStyle = '#c8d4e2'; x.fillRect(110, 525, W - 220, 3);
+  x.fillStyle = '#4a5a70'; x.font = '500 32px "Noto Sans", Arial, sans-serif';
+  x.fillText(state.pos || 'Лауазымы', 110, 575);
+  const { score } = totals();
+  const d = new Date(); const ds = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
+  const cols = [['Нәтиже', score + ' / 20'], ['Күні', ds], ['Сабақтар', '5 / 5']];
+  cols.forEach((cc, i) => { const cx = 110 + i * 330; x.fillStyle = '#4a5a70'; x.font = '500 26px "Noto Sans", Arial, sans-serif'; x.fillText(cc[0], cx, 660); x.fillStyle = '#13233a'; x.font = '800 44px Montserrat, Arial, sans-serif'; x.fillText(cc[1], cx, 712); });
+  x.fillStyle = '#4a5a70'; x.font = '500 26px "Noto Sans", Arial, sans-serif'; x.fillText('Тақырыптар', 110, 790);
+  x.fillStyle = '#13233a'; x.font = '600 28px "Noto Sans", Arial, sans-serif';
+  wrapText(x, 'наряд-рұқсат, ЖҚҚ, темірбетон тіректер, биіктіктегі жұмыс, кәбіл құдығы', 110, 832, W - 220, 38);
+  x.fillStyle = '#0b4f8a'; x.font = '900 36px Montserrat, Arial, sans-serif'; x.fillText('Қауіпсіздікті сақта! Сені үйде күтеді.', 110, 930);
+  x.fillStyle = '#b42318'; x.font = '700 26px "Noto Sans", Arial, sans-serif';
+  x.fillText('Бұл сертификат жарамсыз. Ресми құжат емес, тек оқу-танысу мақсатында берілген.', 110, 1000);
+  x.fillStyle = '#7a889c'; x.font = '500 22px "Noto Sans", Arial, sans-serif';
+  x.fillText('Атырау қатынау желілерін пайдалану департаменті · «Қазақтелеком» АҚ', 110, 1045);
+  // VOID stamp
+  x.save(); x.translate(W / 2 + 180, H / 2 + 20); x.rotate(-18 * Math.PI / 180);
+  x.globalAlpha = 0.5; x.strokeStyle = '#d62828'; x.lineWidth = 12; x.fillStyle = '#d62828';
+  x.font = '900 150px Montserrat, Arial Black, sans-serif'; const tw = x.measureText('ЖАРАМСЫЗ').width;
+  x.strokeRect(-tw / 2 - 40, -125, tw + 80, 175); x.textAlign = 'center'; x.fillText('ЖАРАМСЫЗ', 0, 10); x.restore();
+  return c;
+}
+async function downloadCert() {
+  const note = $('dlNote');
+  try {
+    const c = await drawCert();
+    const url = c.toDataURL('image/png');
+    const a = document.createElement('a');
+    const nm = (state.name || 'sertifikat').replace(/[^\p{L}\p{N}]+/gu, '_');
+    a.href = url; a.download = 'HSE_sertifikat_' + nm + '.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    note.textContent = 'Сертификат жүктелді. Егер файл сақталмаса, браузердің жүктеу рұқсатын тексеріңіз.';
+  } catch (e) { note.textContent = 'Жүктеу мүмкін болмады: ' + e.message; }
+}
+$('dlBtn').addEventListener('click', downloadCert);
 
 function show(v) { ['v-home', 'v-lesson', 'v-cert'].forEach(x => $(x).classList.toggle('on', x === v)); window.scrollTo(0, 0); }
 function route() {
