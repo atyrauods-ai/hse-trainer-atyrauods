@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Қауіпсіздік тренажёры</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Бір визуалды әлем: түнгі диспетчерлік пульт — қою көк фон, «Қазақтелеком» көгі, сигналдық сары */
+  --bg: #0b1626;
+  --panel: #12233a;
+  --line: #24405f;
+  --text: #e8eef6;
+  --muted: #97a9c0;
+  --brand: #1a8ce0;
+  --signal: #f2c230;
+  --ok: #2fb36b;
+  --bad: #e0483a;
+  --display: "Montserrat", "Arial Black", system-ui, sans-serif;
+  --body: "Noto Sans", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--body); font-size: 16px; line-height: 1.5; }
+a { color: var(--brand); }
+button { font: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--signal); outline-offset: 2px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+header.top { border-bottom: 1px solid var(--line); background: #0e1c30; }
+header.top .wrap { display: flex; align-items: center; gap: 16px; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; }
+.logo { background: #fff; border-radius: 10px; padding: 6px 10px; display: flex; }
+.logo img { height: 40px; display: block; }
+.brandtxt { display: flex; flex-direction: column; }
+.brandtxt b { font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: .01em; }
+.brandtxt span { color: var(--muted); font-size: 13px; }
+.navbtn { margin-left: auto; background: transparent; border: 1px solid var(--line); color: var(--text); border-radius: 999px; padding: 8px 16px; font-weight: 600; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(28px, 4.4vw, 44px); font-weight: 900; line-height: 1.1; }
+h2 { font-size: 26px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+.muted { color: var(--muted); }
+.hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: 28px; padding: 32px 0 20px; align-items: center; }
+.hero p { margin: 12px 0 0; max-width: 60ch; color: var(--muted); }
+.stripe { height: 8px; border-radius: 4px; background: repeating-linear-gradient(135deg, var(--signal) 0 14px, #1a1a1a 14px 28px); width: 140px; margin-bottom: 14px; }
+.stats { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; min-width: 130px; }
+.stat b { font-family: var(--display); font-size: 24px; font-variant-numeric: tabular-nums; display: block; }
+.stat span { font-size: 13px; color: var(--muted); }
+.bar { height: 10px; background: #0a1220; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; margin-top: 16px; max-width: 460px; }
+.bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--brand), var(--ok)); width: 0; transition: width .5s; }
+video { width: 100%; border-radius: 14px; background: #000; display: block; border: 1px solid var(--line); }
+.lessons { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding: 8px 0 40px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; text-align: left; color: var(--text); padding: 0; }
+.card:hover { border-color: var(--brand); }
+.card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+.card .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.card .row { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.num { font-family: var(--display); font-weight: 900; color: var(--signal); font-size: 14px; letter-spacing: .08em; }
+.chip { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.done { background: rgba(47,179,107,.15); border-color: var(--ok); color: #7fe0a8; }
+.chip.part { background: rgba(242,194,48,.12); border-color: var(--signal); color: var(--signal); }
+.sec-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 12px; flex-wrap: wrap; }
+.view { display: none; }
+.view.on { display: block; }
+.lesson { display: grid; grid-template-columns: 1.25fr 1fr; gap: 24px; padding: 24px 0 40px; align-items: start; }
+.rules { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-top: 16px; }
+.rules ul { margin: 8px 0 0; padding-left: 20px; }
+.rules li { margin: 4px 0; }
+.quiz { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.qhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 12px; height: 12px; border-radius: 50%; background: #0a1220; border: 1px solid var(--line); display: block; }
+.dots i.ok { background: var(--ok); border-color: var(--ok); }
+.dots i.bad { background: var(--bad); border-color: var(--bad); }
+.dots i.cur { border-color: var(--signal); }
+.qtext { font-size: 18px; font-weight: 600; margin: 6px 0 14px; }
+.opts { display: grid; gap: 10px; }
+.opt { text-align: left; background: #0e1c30; color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; }
+.opt:hover:not([disabled]) { border-color: var(--brand); }
+.opt b { font-family: var(--display); color: var(--muted); min-width: 1.2em; }
+.opt.right { border-color: var(--ok); background: rgba(47,179,107,.14); }
+.opt.wrong { border-color: var(--bad); background: rgba(224,72,58,.14); }
+.opt[disabled] { cursor: default; }
+.explain { margin-top: 14px; padding: 12px 14px; border-radius: 10px; border-left: 4px solid var(--ok); background: #0e1c30; display: none; }
+.explain.on { display: block; }
+.explain.no { border-left-color: var(--bad); }
+.actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.btn { background: var(--brand); color: #fff; border: 0; border-radius: 10px; padding: 12px 18px; font-weight: 700; }
+.btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--text); }
+.btn.sig { background: var(--signal); color: #1a1a1a; }
+.btn[disabled] { opacity: .45; cursor: default; }
+.result { text-align: center; padding: 8px 0; }
+.result .big { font-family: var(--display); font-size: 56px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.cert-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px 0 40px; align-items: start; }
+.cert { background: #fdfcf7; color: #13233a; border-radius: 16px; padding: 28px; border: 10px solid #fff; outline: 2px solid var(--brand); position: relative; overflow: hidden; }
+.cert .ribbon { position: absolute; right: -40px; top: 20px; transform: rotate(35deg); background: var(--signal); color: #1a1a1a; font-family: var(--display); font-weight: 900; padding: 6px 50px; font-size: 13px; }
+.cert img { height: 52px; }
+.cert h2 { font-size: 28px; margin-top: 16px; color: #0b4f8a; }
+.cert .name { font-family: var(--display); font-size: 26px; font-weight: 800; border-bottom: 2px solid #c8d4e2; padding: 10px 0 6px; margin: 14px 0 8px; min-height: 1.6em; }
+.cert .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; font-size: 14px; }
+.cert .meta div b { display: block; font-family: var(--display); font-size: 20px; font-variant-numeric: tabular-nums; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+.field input { background: #0e1c30; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 12px; font: inherit; }
+.locked { padding: 16px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); margin-top: 16px; }
+footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+footer .wrap { padding-top: 16px; padding-bottom: 24px; display: flex; gap: 12px; justify-content: space-between; flex-wrap: wrap; }
+@media (max-width: 820px) {
+  .hero, .lesson, .cert-wrap { grid-template-columns: 1fr; }
+  .navbtn { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="logo"><img src="logo.png" alt="Қазақтелеком"></div>
+    <div class="brandtxt"><b>Қауіпсіздік тренажёры</b><span>Өндірістік қауіпсіздік · телеком саласы</span></div>
+    <button class="navbtn" id="homeBtn" type="button">Барлық сабақтар</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- HOME -->
+  <section class="view on" id="v-home">
+    <div class="hero">
+      <div>
+        <div class="stripe" aria-hidden="true"></div>
+        <h1>Қауіпсіздікті сақта: 5 сабақ, 20 сұрақ</h1>
+        <p>Әр сабақта қысқа 3D-бейне мен тест бар. Бейнені көріп, сұрақтарға жауап бер. Барлық сабақты өткенде қауіпсіздік сертификатын аласың.</p>
+        <div class="stats">
+          <div class="stat"><b id="sLessons">0 / 5</b><span>өтілген сабақ</span></div>
+          <div class="stat"><b id="sScore">0 / 20</b><span>дұрыс жауап</span></div>
+          <div class="stat"><b id="sPct">0%</b><span>нәтиже</span></div>
+        </div>
+        <div class="bar" aria-hidden="true"><i id="pbar"></i></div>
+        <div class="actions">
+          <button class="btn sig" id="startBtn" type="button">Сабақты бастау</button>
+          <button class="btn ghost" id="certBtn" type="button">Сертификат</button>
+        </div>
+      </div>
+      <video src="intro.mp4" poster="intro.jpg" controls playsinline preload="metadata"></video>
+    </div>
+    <div class="sec-title"><h2>Сабақтар</h2><span class="muted">Сабақты таңдап, бейнені көр</span></div>
+    <div class="lessons" id="lessonList"></div>
+  </section>
+
+  <!-- LESSON -->
+  <section class="view" id="v-lesson">
+    <div class="lesson">
+      <div>
+        <div class="num" id="lNum">1-САБАҚ</div>
+        <h2 id="lTitle" style="margin:6px 0 14px">—</h2>
+        <video id="lVideo" controls playsinline preload="metadata"></video>
+        <div class="rules"><h3>Есте сақта</h3><ul id="lRules"></ul></div>
+      </div>
+      <div class="quiz" id="quiz" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- CERTIFICATE -->
+  <section class="view" id="v-cert">
+    <div class="cert-wrap">
+      <div>
+        <h2>Қауіпсіздік сертификаты</h2>
+        <p class="muted">Барлық 5 сабақты өтіп, кемінде 16 дұрыс жауап жинағанда сертификат ашылады.</p>
+        <div id="certLock" class="locked"></div>
+        <div class="field" id="nameField">
+          <label for="nameIn">Аты-жөніңіз</label>
+          <input id="nameIn" type="text" maxlength="60" placeholder="Мысалы: Шайдуллин А.С." autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="posIn">Лауазымыңыз</label>
+          <input id="posIn" type="text" maxlength="60" placeholder="Мысалы: жетекші инженер">
+        </div>
+        <p class="muted" style="font-size:13px">Сертификатты сақтау үшін экранның суретін түсір.</p>
+        <video src="outro.mp4" poster="outro.jpg" controls playsinline preload="metadata" style="margin-top:12px"></video>
+      </div>
+      <div class="cert" id="cert">
+        <div class="ribbon">HSE</div>
+        <img src="logo.png" alt="Қазақтелеком">
+        <h2>СЕРТИФИКАТ</h2>
+        <div style="font-size:14px">Өндірістік қауіпсіздік бойынша сандық тренажёрдан табысты өтті</div>
+        <div class="name" id="cName">Аты-жөні</div>
+        <div id="cPos" style="font-size:14px;color:#4a5a70">Лауазымы</div>
+        <div class="meta">
+          <div>Нәтиже<b id="cScore">0 / 20</b></div>
+          <div>Күні<b id="cDate">—</b></div>
+          <div>Сабақтар<b>5 / 5</b></div>
+          <div>Тақырыптар<b style="font-size:13px;line-height:1.35">наряд-рұқсат, ЖҚҚ, темірбетон тіректер, биіктік, кәбіл құдығы</b></div>
+        </div>
+        <div style="margin-top:18px;font-family:var(--display);font-weight:900;color:#0b4f8a">Қауіпсіздікті сақта! Сені үйде күтеді.</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Атырау қатынау желілерін пайдалану департаменті · Жетекші инженер Шайдуллин А.С.</span>
+    <span>Бейне мен дауыс жасанды интеллект арқылы жасалған</span>
+  </div>
+</footer>
+
+<script>
+const LESSONS = [
+  { id: 1, title: 'Наряд-рұқсат', video: 'l1.mp4', poster: 'l1.jpg', dur: '0:10',
+    rules: ['Жоғары қауіпті жұмыс тек наряд-рұқсат бойынша жүргізіледі.', 'Жұмыс алдында нысаналы нұсқама өткізіледі, бригада қол қояды.', 'Жұмыс орны қоршалмайынша жұмысқа кіріспе.'],
+    q: [
+      { t: 'Жоғары қауіпті жұмысты бастамас бұрын не міндетті?', o: ['Бригадирмен ауызша келісу жеткілікті', 'Наряд-рұқсат ресімдеу және нысаналы нұсқама өткізу', 'Жұмыс аяқталған соң құжат толтыру', 'Тәжірибелі жұмыскерге ешнәрсе қажет емес'], a: 1,
+        e: 'Наряд-рұқсат жұмыстың көлемін, қауіпті факторларды және қауіпсіздік шараларын белгілейді. Онсыз жұмысқа рұқсат жоқ.' },
+      { t: 'Нысаналы нұсқаманы кім өткізеді?', o: ['Жұмыс жетекшісі (жауапты тұлға)', 'Бригаданың кез келген мүшесі', 'Көлік жүргізушісі', 'Нұсқама міндетті емес'], a: 0,
+        e: 'Нысаналы нұсқаманы жұмыс жетекшісі өткізеді және оны наряд-рұқсатқа тіркейді.' },
+      { t: 'Бригада мүшелері наряд-рұқсатқа не үшін қол қояды?', o: ['Жалақы алу үшін', 'Нұсқаманы тыңдап, қауіптерді түсінгенін растау үшін', 'Келу уақытын белгілеу үшін', 'Қол қою міндетті емес'], a: 1,
+        e: 'Қолы бар әр жұмыскер нұсқамамен танысқанын және қауіпсіздік шараларын білетінін растайды.' },
+      { t: 'Жұмыс орны қоршалмаған болса, не істеу керек?', o: ['Жылдам бітіріп, кетіп қалу', 'Жұмысқа кіріспей, алдымен аймақты қоршау', 'Жұмысты түнге қалдыру', 'Қоршаусыз да жұмыс істей беру'], a: 1,
+        e: 'Қоршау бөгде адамдарды қауіпті аймақтан алыстатады. Ол орнатылмайынша жұмыс басталмайды.' }
+    ] },
+  { id: 2, title: 'Жеке қорғаныш құралдары', video: 'l2.mp4', poster: 'l2.jpg', dur: '0:17',
+    rules: ['Каска иек бауы бекітілген күйде киіледі.', 'Биіктікте сақтандыру белдігі мен каска міндетті.', 'Ақаулы ЖҚҚ-ны пайдаланба, бірден ауыстыр.'],
+    q: [
+      { t: 'Қорғаныш каскасы қалай дұрыс киіледі?', o: ['Шүйдеге қарай ысырып', 'Иек бауы бекітілген күйде', 'Тек кранның астында ғана', 'Қолда ұстап жүру жеткілікті'], a: 1,
+        e: 'Иек бауы құлағанда немесе соққыда каска басыңнан түсіп кетпеуі үшін керек.' },
+      { t: 'Биіктікте жұмыс істегенде қандай ЖҚҚ міндетті?', o: ['Тек сигналдық кеудеше', 'Сақтандыру белдігі және каска', 'Тек қолғап', 'Ешқандай ЖҚҚ қажет емес'], a: 1,
+        e: 'Сақтандыру белдігі құлаудан қорғайды, каска басты соққыдан сақтайды.' },
+      { t: 'Диэлектрлік қолғап не үшін қажет?', o: ['Жылыну үшін', 'Электр тогынан қорғау үшін', 'Қолды кірден сақтау үшін ғана', 'Сән үшін'], a: 1,
+        e: 'Диэлектрлік қолғап кернеуде тұруы мүмкін жабдықпен жұмыс кезінде электр тогынан қорғайды.' },
+      { t: 'ЖҚҚ ақаулы болып шықса, не істейсің?', o: ['Абайлап пайдалана беремін', 'Пайдаланбай, жетекшіге хабарлап, ауыстырамын', 'Скотчпен жапсырамын', 'Әріптесіме беремін'], a: 1,
+        e: 'Ақаулы ЖҚҚ қорғамайды. Оны жұмыстан алып тастап, жарамдысымен ауыстыру керек.' }
+    ] },
+  { id: 3, title: 'Темірбетон тіректерді түсіру және орнату', video: 'l3.mp4', poster: 'l3.jpg', dur: '0:21',
+    rules: ['Жүкті тек куәлігі бар стропальщик байлайды.', 'Көтерілген жүктің астында тұруға болмайды.', 'Тіректі тартқыш арқанмен қашықтан бағытта.'],
+    q: [
+      { t: 'Тіректі кранға кім стропқа байлайды?', o: ['Кез келген бос жұмыскер', 'Куәлігі бар стропальщик', 'Кран жүргізушісінің өзі', 'Бригадир ғана'], a: 1,
+        e: 'Стропалау арнайы оқудан өтіп, куәлік алған стропальщиктің ғана міндеті.' },
+      { t: 'Кран жүкті көтеріп тұрғанда қайда тұруға болмайды?', o: ['Қоршаудың сыртында', 'Көтерілген жүктің астында және оның жылжу аймағында', 'Кабинадан алыс жерде', 'Барлық жерде тұруға болады'], a: 1,
+        e: 'Строп үзілсе немесе жүк тайып кетсе, астындағы адам ауыр жарақат алады. Бұл аймақ қатаң тыйым салынған.' },
+      { t: 'Тіректі қалай бағыттау керек?', o: ['Қолмен итеріп', 'Тартқыш арқанмен қашықтан', 'Иықпен сүйеп', 'Бағыттаудың қажеті жоқ'], a: 1,
+        e: 'Тартқыш арқан жүкті бұрылудан сақтап, жұмыскерді қауіпсіз қашықтықта ұстайды.' },
+      { t: 'Кран жүргізушісіне кім белгі береді?', o: ['Тағайындалған стропальщик (сигналшы)', 'Жанынан өтіп бара жатқан адам', 'Бәрі бірден', 'Белгі берудің қажеті жоқ'], a: 0,
+        e: 'Белгіні тек бір тағайындалған адам береді. Әйтпесе жүргізуші шатасып, апат болуы мүмкін.' }
+    ] },
+  { id: 4, title: 'Тірекке көтерілу және биіктіктегі жұмыс', video: 'l4.mp4', poster: 'l4.jpg', dur: '0:12',
+    rules: ['Көтерілер алдында тіректі, лаздарды және белдікті тексер.', 'Сақтандыру белдігімен үнемі бекітілген бол.', 'Тірек айналасы қоршалады, жетекші сырттан бақылайды.'],
+    q: [
+      { t: 'Тірекке көтерілер алдында не тексеріледі?', o: ['Ауа райы ғана', 'Тіректің беріктігі, лаздар мен сақтандыру белдігінің жарамдылығы', 'Телефонның заряды', 'Ештеңе тексерілмейді'], a: 1,
+        e: 'Шірік немесе зақымдалған тірек, ақаулы лаз не белдік құлауға әкеледі. Тексеріс міндетті.' },
+      { t: 'Лазбен көтерілгенде сақтандыру белдігі қалай қолданылады?', o: ['Белге байлап, тірекке ілмейді', 'Тірекке орап, бекітілген күйде жоғары жылжыта отырып', 'Жоғарыға жеткенде ғана бекітеді', 'Белдік қажет емес'], a: 1,
+        e: 'Белдік тіректі орап тұрады және әр қадам сайын жоғары жылжытылады. Сонда жұмыскер бір сәтке де бекітусіз қалмайды.' },
+      { t: 'Биіктікте неше пайыз уақыт бекітілген болу керек?', o: ['50%', '80%', '100% — үнемі', 'Тек жұмыс басында'], a: 2,
+        e: 'Биіктікте бекітусіз бір секунд та қауіпті. Ереже: әрқашан 100% бекітілген бол.' },
+      { t: 'Тірек астындағы жұмыс аймағында кім тұрады?', o: ['Бригаданың бәрі', 'Ешкім, аймақ қоршалады, жетекші сырттан бақылайды', 'Келушілер', 'Көлік жүргізушісі'], a: 1,
+        e: 'Жоғарыдан құрал не бөлшек құлауы мүмкін. Сондықтан тірек астындағы аймақ қоршалып, бос тұрады.' }
+    ] },
+  { id: 5, title: 'Кәбіл құдығындағы жұмыс', video: 'l5.mp4', poster: 'l5.jpg', dur: '0:12',
+    rules: ['Түсер алдында құдықты желдет және газ талдағышпен тексер.', 'Құдыққа тек сақтандыру арқанымен түс.', 'Жоғарыда міндетті түрде бақылаушы болады.'],
+    q: [
+      { t: 'Құдыққа түсер алдында ең алдымен не істеу керек?', o: ['Бірден түсіп, жылдам бітіру', 'Құдықты желдету және газ талдағышпен тексеру', 'Шам жағып қарау', 'Сіріңке жағып тексеру'], a: 1,
+        e: 'Құдықта улы немесе жарылғыш газ жиналуы мүмкін. Ашық от қатаң тыйым салынған, тек газ талдағышпен тексеріледі.' },
+      { t: 'Газ талдағыш нені өлшейді?', o: ['Ауа температурасын ғана', 'Оттегі мен қауіпті газдарды: O₂, CH₄, CO, H₂S', 'Су деңгейін', 'Шу деңгейін'], a: 1,
+        e: 'Оттегі жеткіліксіз болса немесе метан, иіс газы, күкіртсутек бар болса, түсуге болмайды.' },
+      { t: 'Құдыққа қалай түсу керек?', o: ['Арқансыз, сатымен ғана', 'Сақтандыру арқанымен, тренога арқылы, жоғарыда бақылаушы тұрғанда', 'Секіріп', 'Жалғыз, ешкімге айтпай'], a: 1,
+        e: 'Арқан мен тренога жұмыскерді қажет кезде құдықтан тез шығаруға мүмкіндік береді.' },
+      { t: 'Құдықта жалғыз жұмыс істеуге бола ма?', o: ['Иә, жұмыс қысқа болса', 'Жоқ, жоғарыда міндетті түрде бақылаушы болуы тиіс', 'Иә, телефон болса', 'Иә, түнде ғана'], a: 1,
+        e: 'Бақылаушы төмендегі жұмыскерді үнемі көріп тұрады және қажет болса құтқару жұмысын бастайды.' }
+    ] }
+];
+
+const KEY = 'qt-hse-trainer-v1';
+let state = { answers: {}, name: '', pos: '' };
+try { const s = localStorage.getItem(KEY); if (s) state = Object.assign(state, JSON.parse(s)); } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+const $ = (id) => document.getElementById(id);
+function lessonScore(l) { const a = state.answers[l.id] || []; return a.filter((x, i) => x === l.q[i].a).length; }
+function lessonDone(l) { const a = state.answers[l.id] || []; return a.length === l.q.length && a.every(x => x !== null && x !== undefined); }
+function totals() {
+  let done = 0, score = 0;
+  LESSONS.forEach(l => { if (lessonDone(l)) done++; score += lessonScore(l); });
+  return { done, score };
+}
+
+function renderHome() {
+  const { done, score } = totals();
+  $('sLessons').textContent = done + ' / 5';
+  $('sScore').textContent = score + ' / 20';
+  $('sPct').textContent = Math.round(score / 20 * 100) + '%';
+  $('pbar').style.width = (done / 5 * 100) + '%';
+  const next = LESSONS.find(l => !lessonDone(l));
+  $('startBtn').textContent = next ? (done ? 'Келесі сабақ: ' + next.id + '-сабақ' : 'Сабақты бастау') : 'Сертификатты алу';
+  const list = $('lessonList'); list.innerHTML = '';
+  LESSONS.forEach(l => {
+    const a = state.answers[l.id] || [];
+    const answered = a.filter(x => x !== null && x !== undefined).length;
+    const st = lessonDone(l) ? `<span class="chip done">Өтілді · ${lessonScore(l)}/4</span>` : answered ? `<span class="chip part">${answered}/4 жауап</span>` : '<span class="chip">Жаңа</span>';
+    const b = document.createElement('button');
+    b.className = 'card'; b.type = 'button';
+    b.innerHTML = `<img src="${l.poster}" alt="">
+      <div class="body"><div class="row"><span class="num">${l.id}-САБАҚ · ${l.dur}</span>${st}</div><h3>${l.title}</h3>
+      <span class="muted" style="font-size:14px">${l.rules[0]}</span></div>`;
+    b.addEventListener('click', () => go('lesson-' + l.id));
+    list.appendChild(b);
+  });
+}
+
+let cur = null, qi = 0;
+function openLesson(id) {
+  cur = LESSONS.find(l => l.id === id);
+  if (!cur) return go('');
+  $('lNum').textContent = cur.id + '-САБАҚ · ' + cur.dur;
+  $('lTitle').textContent = cur.title;
+  const v = $('lVideo'); v.src = cur.video; v.poster = cur.poster;
+  $('lRules').innerHTML = cur.rules.map(r => `<li>${r}</li>`).join('');
+  const a = state.answers[cur.id] || [];
+  qi = lessonDone(cur) ? cur.q.length : a.filter(x => x !== null && x !== undefined).length;
+  renderQuiz();
+}
+
+function dots() {
+  const a = state.answers[cur.id] || [];
+  return '<div class="dots">' + cur.q.map((q, i) => {
+    let c = '';
+    if (a[i] !== undefined && a[i] !== null) c = a[i] === q.a ? 'ok' : 'bad';
+    else if (i === qi) c = 'cur';
+    return `<i class="${c}"></i>`;
+  }).join('') + '</div>';
+}
+
+function renderQuiz() {
+  const box = $('quiz');
+  if (qi >= cur.q.length) {
+    const s = lessonScore(cur);
+    const nextL = LESSONS.find(l => l.id > cur.id) || null;
+    box.innerHTML = `<div class="qhead"><h3>Сабақ тесті</h3>${dots()}</div>
+      <div class="result"><div class="big">${s} / 4</div>
+      <p>${s === 4 ? 'Өте жақсы! Барлық жауап дұрыс.' : s >= 3 ? 'Жақсы нәтиже. Қатені қайта қарап шық.' : 'Бейнені қайта көріп, тесті тағы өтіп көр.'}</p></div>
+      <div class="actions">
+        ${nextL ? `<button class="btn sig" type="button" id="nextBtn">Келесі сабақ</button>` : `<button class="btn sig" type="button" id="nextBtn">Сертификатқа өту</button>`}
+        <button class="btn ghost" type="button" id="retryBtn">Тесті қайта өту</button>
+      </div>`;
+    $('nextBtn').onclick = () => go(nextL ? 'lesson-' + nextL.id : 'certificate');
+    $('retryBtn').onclick = () => { state.answers[cur.id] = []; save(); qi = 0; renderQuiz(); renderHome(); };
+    return;
+  }
+  const q = cur.q[qi];
+  const letters = ['А', 'Ә', 'Б', 'В'];
+  box.innerHTML = `<div class="qhead"><h3>Сұрақ ${qi + 1} / ${cur.q.length}</h3>${dots()}</div>
+    <div class="qtext">${q.t}</div>
+    <div class="opts">${q.o.map((o, i) => `<button class="opt" type="button" data-i="${i}"><b>${letters[i]}</b><span>${o}</span></button>`).join('')}</div>
+    <div class="explain" id="expl"></div>
+    <div class="actions"><button class="btn" type="button" id="qNext" disabled>${qi + 1 < cur.q.length ? 'Келесі сұрақ' : 'Нәтижені көру'}</button></div>`;
+  box.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => answer(+b.dataset.i)));
+  $('qNext').onclick = () => { qi++; renderQuiz(); };
+}
+
+function answer(i) {
+  const q = cur.q[qi];
+  const a = state.answers[cur.id] || (state.answers[cur.id] = []);
+  a[qi] = i; save();
+  const box = $('quiz');
+  box.querySelectorAll('.opt').forEach(b => {
+    const k = +b.dataset.i; b.disabled = true;
+    if (k === q.a) b.classList.add('right');
+    else if (k === i) b.classList.add('wrong');
+  });
+  const ex = $('expl');
+  ex.className = 'explain on' + (i === q.a ? '' : ' no');
+  ex.innerHTML = `<b>${i === q.a ? 'Дұрыс!' : 'Қате.'}</b> ${q.e}`;
+  box.querySelector('.qhead .dots').outerHTML = dots();
+  $('qNext').disabled = false;
+  renderHome();
+}
+
+function renderCert() {
+  const { done, score } = totals();
+  const ok = done === 5 && score >= 16;
+  $('certLock').style.display = ok ? 'none' : 'block';
+  $('certLock').textContent = ok ? '' : `Сертификат әлі жабық: ${done}/5 сабақ өтілді, ${score}/20 дұрыс жауап. Қажет: 5 сабақ және кемінде 16 дұрыс жауап.`;
+  $('cert').style.opacity = ok ? '1' : '.35';
+  $('nameIn').value = state.name || ''; $('posIn').value = state.pos || '';
+  $('cName').textContent = state.name || 'Аты-жөні';
+  $('cPos').textContent = state.pos || 'Лауазымы';
+  $('cScore').textContent = score + ' / 20';
+  const d = new Date();
+  $('cDate').textContent = String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
+}
+$('nameIn').addEventListener('input', e => { state.name = e.target.value; save(); $('cName').textContent = state.name || 'Аты-жөні'; });
+$('posIn').addEventListener('input', e => { state.pos = e.target.value; save(); $('cPos').textContent = state.pos || 'Лауазымы'; });
+
+function show(v) { ['v-home', 'v-lesson', 'v-cert'].forEach(x => $(x).classList.toggle('on', x === v)); window.scrollTo(0, 0); }
+function route() {
+  const h = location.hash.replace('#', '');
+  document.querySelectorAll('video').forEach(v => { try { v.pause(); } catch (e) {} });
+  if (h.startsWith('lesson-')) { show('v-lesson'); openLesson(+h.slice(7)); }
+  else if (h === 'certificate') { show('v-cert'); renderCert(); }
+  else { show('v-home'); renderHome(); }
+}
+function go(h) { if (location.hash.replace('#', '') === h) route(); else location.hash = h; }
+window.addEventListener('hashchange', route);
+$('homeBtn').onclick = () => go('');
+$('certBtn').onclick = () => go('certificate');
+$('startBtn').onclick = () => { const n = LESSONS.find(l => !lessonDone(l)); go(n ? 'lesson-' + n.id : 'certificate'); };
+route();
+</script>
+</body>
+</html>
